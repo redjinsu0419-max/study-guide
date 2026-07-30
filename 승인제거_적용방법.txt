@@ -1,0 +1,24 @@
+관리자 승인 제거 수정본 적용 방법
+
+중요: 아래 3가지를 모두 해야 합니다. APK만 새로 설치하면 기존 Worker와 Firestore Rules에서 다시 막힐 수 있습니다.
+
+1. GitHub 저장소 파일 교체
+   - 이 ZIP을 압축 해제합니다.
+   - GitHub 저장소의 기존 파일을 수정본 파일로 교체해 커밋합니다.
+   - Actions > Build Android APK > Run workflow를 실행합니다.
+   - 성공 후 Artifacts의 study-guide-android를 내려받아 APK를 설치합니다.
+
+2. Cloudflare Worker 재배포
+   - Cloudflare > Workers & Pages > study-guide-api > 코드 편집으로 이동합니다.
+   - 수정본의 worker/src/index.js 전체를 붙여 넣고 배포합니다.
+   - ADMIN_EMAIL 변수는 더 이상 사용하지 않으므로 삭제해도 됩니다.
+
+3. Firestore Rules 재배포
+   - Firebase Console > Firestore Database > Rules로 이동합니다.
+   - 수정본의 firestore.rules 전체를 붙여 넣고 게시합니다.
+
+적용 결과
+- 기존 계정의 approved 값이 false여도 로그인 후 바로 사용됩니다.
+- 새 계정은 회원가입이 끝나면 곧바로 홈 화면으로 이동합니다.
+- 관리자 승인 대기 화면, 승인 요청 이메일, 승인 관리 메뉴가 사라집니다.
+- 로그인하지 않은 사용자는 계속 문제 풀이 API를 사용할 수 없습니다.

@@ -2,11 +2,9 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 
-import 'config/app_config.dart';
 import 'models/app_user.dart';
 import 'screens/auth/login_screen.dart';
 import 'screens/home_shell.dart';
-import 'screens/pending_screen.dart';
 import 'services/auth_service.dart';
 import 'services/firestore_service.dart';
 
@@ -78,13 +76,6 @@ class AuthGate extends StatelessWidget {
         final firebaseUser = authSnapshot.data;
         if (firebaseUser == null) return const LoginScreen();
 
-        if (AppConfig.isAdminEmail(firebaseUser.email)) {
-          return HomeShell(
-            firebaseUser: firebaseUser,
-            isAdmin: true,
-          );
-        }
-
         return StreamBuilder<AppUser?>(
           stream: firestore.watchUser(firebaseUser.uid),
           builder: (context, profileSnapshot) {
@@ -94,19 +85,13 @@ class AuthGate extends StatelessWidget {
             if (profileSnapshot.connectionState == ConnectionState.waiting) {
               return const _LoadingScreen();
             }
-            final profile = profileSnapshot.data;
-            if (profile == null) {
-              return const _ProfileErrorScreen(
-                error: '가입 정보가 없습니다. 관리자에게 문의해 주세요.',
-              );
-            }
-            if (!profile.approved) {
-              return PendingScreen(user: profile);
-            }
+
+            // 관리자 승인 절차 없이 Firebase 로그인 직후 바로 입장합니다.
+            // 기존 관리자 계정처럼 사용자 문서가 없어도 기본 학년 설정으로
+            // 앱을 사용할 수 있습니다.
             return HomeShell(
               firebaseUser: firebaseUser,
-              appUser: profile,
-              isAdmin: false,
+              appUser: profileSnapshot.data,
             );
           },
         );
@@ -206,4 +191,3 @@ class _ProfileErrorScreen extends StatelessWidget {
     );
   }
 }
-

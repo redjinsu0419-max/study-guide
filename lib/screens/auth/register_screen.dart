@@ -1,8 +1,6 @@
 import 'package:flutter/material.dart';
 
-import '../../models/app_user.dart';
 import '../../models/school_selection.dart';
-import '../../services/approval_email_service.dart';
 import '../../services/auth_service.dart';
 
 class RegisterScreen extends StatefulWidget {
@@ -44,29 +42,13 @@ class _RegisterScreenState extends State<RegisterScreen> {
       _error = null;
     });
     try {
-      final firebaseUser = await AuthService().register(
+      await AuthService().register(
         displayName: _nameController.text,
         email: _emailController.text,
         password: _passwordController.text,
         schoolLevel: _schoolLevel,
         grade: _grade,
       );
-      final pendingUser = AppUser(
-        uid: firebaseUser.uid,
-        email: firebaseUser.email ?? _emailController.text.trim(),
-        displayName: _nameController.text.trim(),
-        schoolLevel: _schoolLevel,
-        grade: _grade,
-        approved: false,
-        rejected: false,
-        guardianConsentRequested: true,
-        guardianConsentConfirmed: false,
-      );
-      try {
-        await ApprovalEmailService.openApprovalRequest(pendingUser);
-      } catch (_) {
-        // 메일 앱을 열지 못해도 가입은 유지하며 대기 화면에서 다시 요청할 수 있습니다.
-      }
       if (mounted) Navigator.of(context).popUntil((route) => route.isFirst);
     } catch (error) {
       if (mounted) {
@@ -80,7 +62,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('가입 승인 요청')),
+      appBar: AppBar(title: const Text('회원가입')),
       body: SafeArea(
         child: SingleChildScrollView(
           padding: const EdgeInsets.all(20),
@@ -225,7 +207,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                                 child:
                                     CircularProgressIndicator(strokeWidth: 2),
                               )
-                            : const Text('가입하고 승인 요청하기'),
+                            : const Text('가입하고 시작하기'),
                       ),
                     ),
                   ],

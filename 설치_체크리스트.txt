@@ -2,7 +2,7 @@
 
 [ ] Cloudflare Workers에서 study-guide-api Worker 생성
 [ ] worker/src/index.js 내용을 Worker에 붙여 넣고 배포
-[ ] FIREBASE_PROJECT_ID, ADMIN_EMAIL 등 일반 변수 등록
+[ ] FIREBASE_PROJECT_ID 등 일반 변수 등록
 [ ] GEMINI_API_KEY, PINECONE_API_KEY를 Secret으로 등록
 [ ] Worker의 /health 주소에서 ok 확인
 [ ] app_config.example.dart를 app_config.dart로 복사
@@ -10,13 +10,12 @@
 [ ] google-services.json을 android/app 폴더에 복사
 [ ] Firebase Authentication에서 이메일/비밀번호 활성화
 [ ] Firestore 데이터베이스 생성
-[ ] firestore.rules 배포
-[ ] redjinsu0419@gmail.com 관리자 계정 생성
+[ ] 새 firestore.rules 배포
 [ ] Pinecone 통합 임베딩 인덱스 생성 및 문제 자료 등록
 [ ] flutter pub get
 [ ] flutter test
-[ ] APK_만들기.bat 실행 또는 flutter run
+[ ] APK_만들기.bat 실행 또는 GitHub Actions 실행
 [ ] 공부_가이드.apk 생성 확인
-[ ] 학생 계정 가입 → 이메일 요청 → 관리자 승인 흐름 시험
-[ ] 미승인 계정의 /solve 요청이 403인지 확인
+[ ] 새 계정 가입 직후 바로 홈 화면으로 들어가는지 확인
+[ ] 문제 풀이, 풀이 기록, 오답 노트가 정상 작동하는지 확인
 [ ] GitHub에 app_config.dart와 google-services.json이 제외됐는지 확인

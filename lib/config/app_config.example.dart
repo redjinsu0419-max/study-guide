@@ -8,22 +8,7 @@ class AppConfig {
   static const String backendBaseUrl =
       'https://PASTE_WORKER_NAME.PASTE_SUBDOMAIN.workers.dev';
 
-  /// Firestore 보안 규칙의 관리자 이메일과 반드시 똑같이 입력하세요.
-  static const List<String> adminEmails = <String>[
-    'redjinsu0419@gmail.com',
-  ];
-
-  static const int maxApprovedUsers = 10;
-
   static bool get hasBackendUrl =>
       backendBaseUrl.trim().startsWith('https://') &&
       !backendBaseUrl.contains('PASTE_');
-
-  static bool isAdminEmail(String? email) {
-    if (email == null) return false;
-    final normalized = email.trim().toLowerCase();
-    return adminEmails.any(
-      (admin) => admin.trim().toLowerCase() == normalized,
-    );
-  }
 }

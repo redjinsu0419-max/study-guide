@@ -124,8 +124,7 @@ export default {
     try {
       validateEnvironment(env);
       const idToken = bearerToken(request.headers.get("Authorization"));
-      const user = await verifyFirebaseToken(idToken, env);
-      await requireApprovedUser(idToken, user, env);
+      await verifyFirebaseToken(idToken, env);
       const input = await readSolveInput(request);
       const geminiResult = await solveWithGemini(input, env);
       const retrieval = await searchPinecone(
@@ -298,33 +297,6 @@ function decodeBase64Url(value) {
   const padded = normalized + "=".repeat((4 - (normalized.length % 4)) % 4);
   const binary = atob(padded);
   return Uint8Array.from(binary, (character) => character.charCodeAt(0));
-}
-
-async function requireApprovedUser(idToken, user, env) {
-  const adminEmail = cleanText(env.ADMIN_EMAIL).toLowerCase();
-  if (adminEmail && user.email === adminEmail) return;
-
-  const project = encodeURIComponent(env.FIREBASE_PROJECT_ID);
-  const uid = encodeURIComponent(user.uid);
-  const url =
-    `https://firestore.googleapis.com/v1/projects/${project}` +
-    `/databases/(default)/documents/users/${uid}`;
-  const response = await fetch(url, {
-    headers: { Authorization: `Bearer ${idToken}` },
-  });
-  if (response.status === 404) {
-    throw new ApiError(403, "가입 정보가 없습니다. 관리자에게 문의해 주세요.");
-  }
-  if (!response.ok) {
-    throw new ApiError(503, "승인 상태를 확인하지 못했습니다.");
-  }
-  const document = await response.json();
-  if (document?.fields?.approved?.booleanValue !== true) {
-    throw new ApiError(
-      403,
-      `${adminEmail || "관리자"}의 승인을 받은 뒤 사용할 수 있습니다.`,
-    );
-  }
 }
 
 async function readSolveInput(request) {

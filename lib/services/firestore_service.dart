@@ -1,9 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 
-import '../config/app_config.dart';
 import '../models/app_user.dart';
 import '../models/solution_result.dart';
-import 'app_exception.dart';
 
 class FirestoreService {
   FirestoreService({FirebaseFirestore? firestore})
@@ -21,72 +19,11 @@ class FirestoreService {
         );
   }
 
-  Stream<List<AppUser>> watchApprovalRequests() {
-    return _firestore
-        .collection('users')
-        .orderBy('createdAt', descending: false)
-        .snapshots()
-        .map(
-          (snapshot) =>
-              snapshot.docs.map(AppUser.fromDocument).toList(growable: false),
-        );
-  }
-
-  Future<void> setApproval({
-    required AppUser user,
-    required bool approved,
-    required bool guardianConsentConfirmed,
-  }) async {
-    if (approved && !guardianConsentConfirmed) {
-      throw const AppException('보호자 동의 확인 후 승인할 수 있습니다.');
-    }
-
-    if (approved && !user.approved) {
-      final approvedSnapshot = await _firestore
-          .collection('users')
-          .where('approved', isEqualTo: true)
-          .get();
-      final approvedStudentCount = approvedSnapshot.docs
-          .where(
-            (document) => !AppConfig.isAdminEmail(
-              document.data()['email'] as String?,
-            ),
-          )
-          .length;
-      if (approvedStudentCount >= AppConfig.maxApprovedUsers) {
-        throw AppException(
-          '승인 가능한 ${AppConfig.maxApprovedUsers}명에 도달했습니다.',
-        );
-      }
-    }
-
-    await userReference(user.uid).update(
-      <String, dynamic>{
-        'approved': approved,
-        'rejected': false,
-        'guardianConsentConfirmed': guardianConsentConfirmed,
-        'updatedAt': FieldValue.serverTimestamp(),
-      },
-    );
-  }
-
-  Future<void> reject(AppUser user) {
-    return userReference(user.uid).update(
-      <String, dynamic>{
-        'approved': false,
-        'rejected': true,
-        'guardianConsentConfirmed': false,
-        'updatedAt': FieldValue.serverTimestamp(),
-      },
-    );
-  }
-
   Future<String> saveSolution({
     required String uid,
     required SolutionResult result,
   }) async {
-    final reference =
-        userReference(uid).collection('history').doc();
+    final reference = userReference(uid).collection('history').doc();
     await reference.set(
       result.toMap(createdAtValue: FieldValue.serverTimestamp()),
     );

@@ -171,7 +171,7 @@ class _LoginScreenState extends State<LoginScreen> {
                         ),
                       );
                     },
-                    child: const Text('처음이신가요? 가입 승인 요청'),
+                    child: const Text('처음이신가요? 회원가입'),
                   ),
                 ],
               ),

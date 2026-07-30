@@ -38,13 +38,12 @@ test("unknown paths return 404", async () => {
   assert.equal(response.status, 404);
 });
 
-test("approved Firebase user receives a combined solution", async () => {
+test("authenticated Firebase user receives a combined solution", async () => {
   const fixture = await firebaseTokenFixture({
     email: "student@example.com",
     uid: "student-1",
   });
   const originalFetch = globalThis.fetch;
-  let approved = true;
   globalThis.fetch = async (input) => {
     const url = String(input);
     if (url.includes("/service_accounts/v1/jwk/")) {
@@ -52,11 +51,6 @@ test("approved Firebase user receives a combined solution", async () => {
         { keys: [fixture.publicJwk] },
         { headers: { "Cache-Control": "public, max-age=3600" } },
       );
-    }
-    if (url.includes("firestore.googleapis.com")) {
-      return Response.json({
-        fields: { approved: { booleanValue: approved } },
-      });
     }
     if (url.includes("generativelanguage.googleapis.com")) {
       return Response.json({
@@ -129,7 +123,6 @@ test("approved Firebase user receives a combined solution", async () => {
       }),
       {
         ...configuredEnvironment,
-        ADMIN_EMAIL: "admin@example.com",
         GEMINI_MODEL: "gemini-3.6-flash",
       },
     );
@@ -155,22 +148,10 @@ test("approved Firebase user receives a combined solution", async () => {
           subject: "임의 과목",
         }),
       }),
-      {
-        ...configuredEnvironment,
-        ADMIN_EMAIL: "admin@example.com",
-      },
+      configuredEnvironment,
     );
     assert.equal(invalidSubjectResponse.status, 400);
 
-    approved = false;
-    const rejectedResponse = await worker.fetch(
-      solveRequest(fixture.token),
-      {
-        ...configuredEnvironment,
-        ADMIN_EMAIL: "admin@example.com",
-      },
-    );
-    assert.equal(rejectedResponse.status, 403);
   } finally {
     globalThis.fetch = originalFetch;
   }

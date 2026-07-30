@@ -9,10 +9,6 @@ class AppUser {
     required this.displayName,
     required this.schoolLevel,
     required this.grade,
-    required this.approved,
-    required this.rejected,
-    required this.guardianConsentRequested,
-    required this.guardianConsentConfirmed,
     this.createdAt,
   });
 
@@ -21,10 +17,6 @@ class AppUser {
   final String displayName;
   final SchoolLevel schoolLevel;
   final int grade;
-  final bool approved;
-  final bool rejected;
-  final bool guardianConsentRequested;
-  final bool guardianConsentConfirmed;
   final DateTime? createdAt;
 
   factory AppUser.fromDocument(
@@ -35,15 +27,9 @@ class AppUser {
     return AppUser(
       uid: document.id,
       email: data['email'] as String? ?? '',
-      displayName: data['displayName'] as String? ?? '학생',
+      displayName: data['displayName'] as String? ?? '',
       schoolLevel: schoolLevelFromStore(data['schoolLevel'] as String?),
       grade: (data['grade'] as num?)?.toInt() ?? 1,
-      approved: data['approved'] as bool? ?? false,
-      rejected: data['rejected'] as bool? ?? false,
-      guardianConsentRequested:
-          data['guardianConsentRequested'] as bool? ?? false,
-      guardianConsentConfirmed:
-          data['guardianConsentConfirmed'] as bool? ?? false,
       createdAt: created is Timestamp ? created.toDate() : null,
     );
   }

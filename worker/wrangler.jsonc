@@ -5,7 +5,6 @@
   "compatibility_date": "2026-07-30",
   "vars": {
     "FIREBASE_PROJECT_ID": "stst-27641",
-    "ADMIN_EMAIL": "redjinsu0419@gmail.com",
     "GEMINI_MODEL": "gemini-3.6-flash",
     "PINECONE_INDEX_NAME": "study-guide-questions",
     "PINECONE_NAMESPACE": "__default__",

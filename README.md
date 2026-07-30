@@ -10,21 +10,17 @@
 - Gemini 멀티모달 API를 통한 문제 인식, 정답, 단계별 풀이, 핵심 개념
 - Pinecone 검색을 통한 유사 기출 2문제와 예상 문제 2문제
 - Firebase 이메일/비밀번호 로그인
-- `redjinsu0419@gmail.com` 관리자 승인 전 앱과 Worker 양쪽에서 접근 차단
-- 가입 직후 관리자 주소가 입력된 승인 요청 메일 작성 화면 열기
+- 회원가입 직후 관리자 승인 없이 바로 사용
 - 원문·유사·예상 문제를 문제와 정답·풀이로 나눠 카카오톡 전송
-- 보호자 동의 확인 및 최대 10명 승인
 - UID별 풀이 기록과 오답 노트 분리 저장
 - 문제 사진은 Firestore에 저장하지 않음
 
 ## 구조와 보안
 
 Flutter 앱은 API 키를 직접 사용하지 않고 Cloudflare Worker의 `/solve`만
-호출합니다. Worker는 요청마다 Firebase ID 토큰을 검증하고 다음 조건 중
-하나를 만족할 때만 Gemini와 Pinecone을 호출합니다.
-
-1. 로그인 이메일이 관리자 주소와 정확히 일치
-2. Firestore의 `users/{uid}.approved`가 `true`
+호출합니다. Worker는 요청마다 Firebase ID 토큰의 서명·프로젝트·만료 시간을
+검증합니다. 유효한 로그인 사용자라면 별도 관리자 승인 없이 Gemini와
+Pinecone을 호출할 수 있습니다.
 
 Gemini·Pinecone 키는 Cloudflare의 암호화된 Secret에만 저장합니다.
 Firebase는 Spark 요금제의 Authentication과 Firestore를 사용합니다.
@@ -51,7 +47,6 @@ Worker의 **Settings → Variables and Secrets**에서 다음 값을 등록합�
 | 이름 | 값 |
 |---|---|
 | `FIREBASE_PROJECT_ID` | `stst-27641` |
-| `ADMIN_EMAIL` | `redjinsu0419@gmail.com` |
 | `GEMINI_MODEL` | `gemini-3.6-flash` |
 | `PINECONE_INDEX_NAME` | `study-guide-questions` |
 | `PINECONE_NAMESPACE` | `__default__` |
@@ -102,7 +97,7 @@ static const String backendBaseUrl =
    android/app/google-services.json
    ```
 
-4. Firebase CLI로 보안 규칙을 배포합니다.
+4. 이 프로젝트의 새 보안 규칙을 배포합니다.
 
    ```bash
    firebase login
@@ -110,14 +105,8 @@ static const String backendBaseUrl =
    firebase deploy --only firestore:rules
    ```
 
-5. 앱 가입 화면 또는 Firebase Authentication에서 관리자 이메일 계정을
-   만듭니다.
-
-관리자 계정은 승인 메뉴를 바로 사용할 수 있습니다. 학생이 가입하면
-이메일 작성 화면이 열리고, 사용자가 **보내기**를 눌러 관리자에게 요청합니다.
-관리자가 같은 앱에서 보호자 동의를 확인하고 승인해야 학생이 사용할 수
-있습니다. 미승인 사용자는 앱 화면뿐 아니라 Worker에서도 HTTP 403으로
-차단됩니다.
+회원가입이 완료되면 바로 앱을 사용할 수 있습니다. 기존 계정의
+`approved` 값이 `false`여도 새 앱과 새 Worker에서는 차단하지 않습니다.
 
 ## 5. Pinecone 준비
 
@@ -166,7 +155,7 @@ build/app/outputs/flutter-apk/app-release.apk
 - `GOOGLE_SERVICES_JSON_BASE64`
 - `PINECONE_API_KEY` (Pinecone 자동 준비 작업용)
 
-마지막 값은 PowerShell에서 다음 명령으로 만들 수 있습니다.
+`GOOGLE_SERVICES_JSON_BASE64` 값은 PowerShell에서 다음 명령으로 만듭니다.
 
 ```powershell
 [Convert]::ToBase64String(

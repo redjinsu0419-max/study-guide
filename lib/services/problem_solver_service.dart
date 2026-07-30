@@ -20,7 +20,7 @@ class ProblemSolverService {
     required String subject,
     ProgressCallback? onProgress,
   }) async {
-    onProgress?.call('승인 상태를 확인하고 문제를 풀이하고 있어요…');
+    onProgress?.call('로그인 정보를 확인하고 문제를 풀이하고 있어요…');
     return _backendService.solveProblem(
       imageBytes: imageBytes,
       mimeType: mimeType,

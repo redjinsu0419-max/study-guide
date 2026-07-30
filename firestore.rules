@@ -2,27 +2,12 @@ rules_version = '2';
 
 service cloud.firestore {
   match /databases/{database}/documents {
-    // app_config.dart의 관리자 이메일과 동일하게 바꾸세요.
-    function isAdmin() {
-      return request.auth != null
-        && request.auth.token.email != null
-        && request.auth.token.email == 'redjinsu0419@gmail.com';
-    }
-
     function isOwner(uid) {
       return request.auth != null && request.auth.uid == uid;
     }
 
-    function isApproved(uid) {
-      return isAdmin()
-        || (
-          isOwner(uid)
-          && exists(/databases/$(database)/documents/users/$(uid))
-          && get(/databases/$(database)/documents/users/$(uid)).data.approved == true
-        );
-    }
-
     match /users/{uid} {
+      // 회원가입 즉시 사용할 수 있도록 본인 계정 문서만 생성하게 합니다.
       allow create: if isOwner(uid)
         && request.resource.data.keys().hasOnly([
           'uid',
@@ -30,44 +15,35 @@ service cloud.firestore {
           'displayName',
           'schoolLevel',
           'grade',
-          'approved',
-          'rejected',
           'role',
-          'guardianConsentRequested',
           'guardianConsentConfirmed',
           'createdAt',
           'updatedAt'
         ])
         && request.resource.data.uid == request.auth.uid
         && request.resource.data.email == request.auth.token.email
-        && request.resource.data.approved == false
-        && request.resource.data.rejected == false
-        && request.resource.data.role == 'student'
-        && request.resource.data.guardianConsentRequested == true
-        && request.resource.data.guardianConsentConfirmed == false;
+        && request.resource.data.role == 'student';
 
-      allow get: if isOwner(uid) || isAdmin();
-      allow list: if isAdmin();
+      allow get: if isOwner(uid);
+      allow list: if false;
 
-      allow update: if isAdmin()
-        || (
-          isOwner(uid)
-          && request.resource.data.diff(resource.data).affectedKeys().hasOnly([
-            'displayName',
-            'schoolLevel',
-            'grade',
-            'updatedAt'
-          ])
-        );
+      allow update: if isOwner(uid)
+        && request.resource.data.diff(resource.data).affectedKeys().hasOnly([
+          'displayName',
+          'schoolLevel',
+          'grade',
+          'guardianConsentConfirmed',
+          'updatedAt'
+        ]);
 
       allow delete: if false;
 
       match /history/{itemId} {
-        allow read, create, update, delete: if isOwner(uid) && isApproved(uid);
+        allow read, create, update, delete: if isOwner(uid);
       }
 
       match /wrongNotes/{itemId} {
-        allow read, create, update, delete: if isOwner(uid) && isApproved(uid);
+        allow read, create, update, delete: if isOwner(uid);
       }
     }
 
