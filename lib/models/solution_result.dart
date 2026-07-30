@@ -153,7 +153,7 @@ class SolutionResult {
   }
 
   Map<String, dynamic> toMap({Object? createdAtValue}) {
-    return <String, dynamic>{
+    final result = <String, dynamic>{
       'schoolLevel': schoolLevel,
       'grade': grade,
       'subject': subject,
@@ -169,8 +169,11 @@ class SolutionResult {
           expectedQuestions.map((item) => item.toMap()).toList(),
       'retrievalMessage': retrievalMessage,
       'isWrong': isWrong,
-      if (createdAtValue != null) 'createdAt': createdAtValue,
     };
+    if (createdAtValue != null) {
+      result['createdAt'] = createdAtValue;
+    }
+    return result;
   }
 
   SolutionResult copyWith({
@@ -225,4 +228,3 @@ class SolutionResult {
         .toList(growable: false);
   }
 }
-
