@@ -1,0 +1,31 @@
+name: Setup Pinecone
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  setup:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      - name: Check out source
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      - name: Create index and upload sample questions
+        env:
+          PINECONE_API_KEY: ${{ secrets.PINECONE_API_KEY }}
+        run: |
+          if [ -z "$PINECONE_API_KEY" ]; then
+            echo "PINECONE_API_KEY 저장소 Secret을 등록하세요."
+            exit 1
+          fi
+          node scripts/setup_pinecone.mjs
