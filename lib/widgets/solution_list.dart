@@ -44,7 +44,7 @@ class SolutionList extends StatelessWidget {
         return ListView.separated(
           padding: const EdgeInsets.fromLTRB(16, 12, 16, 100),
           itemCount: documents.length,
-          separatorBuilder: (_, __) => const SizedBox(height: 10),
+          separatorBuilder: (_, _) => const SizedBox(height: 10),
           itemBuilder: (context, index) {
             final document = documents[index];
             final result = SolutionResult.fromMap(document.data());
@@ -93,4 +93,3 @@ class SolutionList extends StatelessWidget {
     );
   }
 }
-
