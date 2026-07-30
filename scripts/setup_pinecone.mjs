@@ -32,8 +32,14 @@ async function request(url, options = {}) {
     }
   }
   if (!response.ok) {
+    const detail =
+      body.message ??
+      body.error?.message ??
+      body.error ??
+      body.raw ??
+      JSON.stringify(body);
     throw new Error(
-      `Pinecone ${response.status}: ${body.message ?? body.raw ?? "요청 실패"}`,
+      `Pinecone ${response.status}: ${detail || "요청 실패"}`,
     );
   }
   return body;
