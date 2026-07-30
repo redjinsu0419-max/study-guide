@@ -1,0 +1,109 @@
+name: Build Android APK
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+
+    steps:
+      - name: Check out source
+        uses: actions/checkout@v4
+
+      - name: Set up Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "17"
+
+      - name: Set up Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          cache: true
+
+      - name: Create private configuration
+        env:
+          BACKEND_BASE_URL: ${{ secrets.BACKEND_BASE_URL }}
+          GOOGLE_SERVICES_JSON_BASE64: ${{ secrets.GOOGLE_SERVICES_JSON_BASE64 }}
+        run: |
+          if [ -z "$BACKEND_BASE_URL" ]; then
+            echo "BACKEND_BASE_URL 저장소 Secret을 등록하세요."
+            exit 1
+          fi
+          if [ -z "$GOOGLE_SERVICES_JSON_BASE64" ]; then
+            echo "GOOGLE_SERVICES_JSON_BASE64 저장소 Secret을 등록하세요."
+            exit 1
+          fi
+          python3 - <<'PY'
+          import os
+          from pathlib import Path
+
+          backend_url = os.environ["BACKEND_BASE_URL"].rstrip("/")
+          if (
+              not backend_url.startswith("https://")
+              or ".workers.dev" not in backend_url
+          ):
+              raise SystemExit(
+                  "BACKEND_BASE_URL에 실제 workers.dev 주소를 입력하세요."
+              )
+          example = Path("lib/config/app_config.example.dart").read_text()
+          configured = example.replace(
+              "https://PASTE_WORKER_NAME.PASTE_SUBDOMAIN.workers.dev",
+              backend_url,
+          )
+          Path("lib/config/app_config.dart").write_text(configured)
+          PY
+          printf '%s' "$GOOGLE_SERVICES_JSON_BASE64" \
+            | base64 --decode > android/app/google-services.json
+          python3 - <<'PY'
+          import json
+          from pathlib import Path
+
+          data = json.loads(
+              Path("android/app/google-services.json").read_text()
+          )
+          project_id = data.get("project_info", {}).get("project_id")
+          clients = data.get("client", [])
+          packages = {
+              item.get("client_info", {})
+              .get("android_client_info", {})
+              .get("package_name")
+              for item in clients
+          }
+          if project_id != "stst-27641":
+              raise SystemExit("google-services.json의 Firebase 프로젝트가 다릅니다.")
+          if "com.example.exam" not in packages:
+              raise SystemExit("google-services.json의 Android 패키지가 다릅니다.")
+          PY
+
+      - name: Install packages
+        run: flutter pub get
+
+      - name: Test Worker
+        run: node --test worker/test/*.test.js
+
+      - name: Analyze Flutter source
+        run: flutter analyze
+
+      - name: Run tests
+        run: flutter test
+
+      - name: Build APK
+        run: flutter build apk --release
+
+      - name: Prepare APK
+        run: cp build/app/outputs/flutter-apk/app-release.apk study-guide.apk
+
+      - name: Upload APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: study-guide-android
+          path: study-guide.apk
+          if-no-files-found: error
+          retention-days: 30
