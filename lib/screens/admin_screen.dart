@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../config/app_config.dart';
 import '../models/app_user.dart';
+import '../models/school_selection.dart';
 import '../services/firestore_service.dart';
 
 class AdminScreen extends StatelessWidget {
@@ -245,4 +246,3 @@ class _ApprovalCardState extends State<_ApprovalCard> {
     );
   }
 }
-
