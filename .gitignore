@@ -1,0 +1,33 @@
+# Flutter / Dart
+.dart_tool/
+.flutter-plugins
+.flutter-plugins-dependencies
+.packages
+.pub-cache/
+build/
+coverage/
+
+# Android
+android/.gradle/
+android/.gradle-bootstrap/
+android/local.properties
+android/key.properties
+*.jks
+*.keystore
+
+# Firebase project-specific configuration
+android/app/google-services.json
+**/service-account*.json
+**/firebase-admin*.json
+
+# Local app configuration (contains the deployed Worker URL)
+lib/config/app_config.dart
+.env
+.env.*
+
+# Editors / operating systems
+.idea/
+.vscode/
+*.iml
+.DS_Store
+Thumbs.db
