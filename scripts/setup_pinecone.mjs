@@ -93,7 +93,8 @@ for (let start = 0; start < records.length; start += 96) {
   const batch = records.slice(start, start + 96);
   await request(endpoint, {
     method: "POST",
-    body: JSON.stringify({ records: batch }),
+    headers: { "Content-Type": "application/x-ndjson" },
+    body: batch.map((record) => JSON.stringify(record)).join("\n"),
   });
   console.log(`${Math.min(start + batch.length, records.length)}건 등록 완료`);
 }
