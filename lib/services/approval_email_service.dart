@@ -2,6 +2,7 @@ import 'package:url_launcher/url_launcher.dart';
 
 import '../config/app_config.dart';
 import '../models/app_user.dart';
+import '../models/school_selection.dart';
 import 'app_exception.dart';
 
 class ApprovalEmailService {
@@ -35,4 +36,3 @@ class ApprovalEmailService {
     }
   }
 }
-
