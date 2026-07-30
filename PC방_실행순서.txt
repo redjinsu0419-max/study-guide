@@ -1,0 +1,69 @@
+공부 가이드 PC방 실행 순서
+
+중요: PC방에 Flutter나 Android Studio를 설치할 필요가 없습니다.
+Cloudflare와 Firebase를 설정한 뒤 GitHub Actions에서 APK를 만듭니다.
+
+1. Cloudflare Worker 완성
+   - Workers & Pages > study-guide-api > 코드 편집
+   - worker/src/index.js 전체를 복사해 기존 Hello World 코드를 모두 교체
+   - 배포
+   - Settings > Variables and Secrets에서 아래 값 등록
+
+   일반 변수
+   FIREBASE_PROJECT_ID = stst-27641
+   ADMIN_EMAIL = redjinsu0419@gmail.com
+   GEMINI_MODEL = gemini-3.6-flash
+   PINECONE_INDEX_NAME = study-guide-questions
+   PINECONE_NAMESPACE = __default__
+   PINECONE_TEXT_FIELD = chunk_text
+
+   Secret
+   GEMINI_API_KEY = 가지고 있는 Gemini 키
+   PINECONE_API_KEY = 가지고 있는 Pinecone 키
+
+   - https://본인주소.workers.dev/health 방문
+   - {"ok":true,"service":"study-guide-api"}가 나오면 정상
+
+2. Firebase 설정
+   - Authentication > Sign-in method > 이메일/비밀번호 사용 설정
+   - Firestore Database 생성
+   - Firestore > Rules에 firestore.rules 내용을 붙여 넣고 게시
+   - 관리자 이메일은 redjinsu0419@gmail.com 그대로 사용
+
+3. GitHub 저장소 만들기
+   - 이 ZIP을 풀어 study_guide 폴더 안의 파일을 새 저장소에 업로드
+   - Settings > Secrets and variables > Actions에서 아래 3개 등록
+
+   BACKEND_BASE_URL
+   Cloudflare의 https://...workers.dev 주소
+
+   GOOGLE_SERVICES_JSON_BASE64
+   PowerShell에서 아래 명령을 실행한 결과
+   [Convert]::ToBase64String([IO.File]::ReadAllBytes("google-services.json"))
+
+   PINECONE_API_KEY
+   가지고 있는 Pinecone 키
+
+4. Pinecone 자동 준비
+   - GitHub > Actions > Setup Pinecone > Run workflow
+   - 초록색 체크가 뜨면 인덱스와 샘플 문제 등록 완료
+
+5. APK 자동 만들기
+   - GitHub > Actions > Build Android APK > Run workflow
+   - 완료 후 study-guide-android 파일 다운로드
+   - 압축을 풀어 study-guide.apk를 안드로이드폰에 설치
+
+6. 최종 작동 시험
+   - redjinsu0419@gmail.com으로 관리자 계정 가입 또는 로그인
+   - 다른 이메일로 학생 계정 가입
+   - 승인 요청 이메일 전송
+   - 관리자 계정의 승인 관리에서 보호자 동의 확인 후 승인
+   - 학생 계정에서 문제 촬영
+   - 풀이, 유사 문제 2개, 예상 문제 2개 확인
+   - 풀이 기록과 오답 노트 확인
+   - 문제와 정답·풀이를 각각 카카오톡으로 전송
+
+주의
+   - API 키와 google-services.json은 GitHub 파일로 직접 올리지 마세요.
+   - 첫 시험에서 Pinecone 샘플과 과목이 다르면 Gemini 생성 문제로 자동 대체됩니다.
+   - 공개된 적이 있는 API 키는 운영 전에 새 키로 교체하는 것이 안전합니다.

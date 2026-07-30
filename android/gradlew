@@ -1,0 +1,26 @@
+#!/usr/bin/env sh
+set -eu
+
+GRADLE_VERSION="8.11.1"
+SCRIPT_DIR=$(CDPATH= cd -- "$(dirname -- "$0")" && pwd)
+INSTALL_DIR="$SCRIPT_DIR/.gradle-bootstrap/gradle-$GRADLE_VERSION"
+ZIP_PATH="$SCRIPT_DIR/.gradle-bootstrap/gradle-$GRADLE_VERSION-bin.zip"
+
+if [ ! -x "$INSTALL_DIR/bin/gradle" ]; then
+  mkdir -p "$SCRIPT_DIR/.gradle-bootstrap"
+  if command -v curl >/dev/null 2>&1; then
+    curl -L --fail --retry 3 \
+      "https://services.gradle.org/distributions/gradle-$GRADLE_VERSION-bin.zip" \
+      -o "$ZIP_PATH"
+  elif command -v wget >/dev/null 2>&1; then
+    wget -O "$ZIP_PATH" \
+      "https://services.gradle.org/distributions/gradle-$GRADLE_VERSION-bin.zip"
+  else
+    echo "Gradle을 내려받으려면 curl 또는 wget이 필요합니다." >&2
+    exit 1
+  fi
+  unzip -q -o "$ZIP_PATH" -d "$SCRIPT_DIR/.gradle-bootstrap"
+fi
+
+exec "$INSTALL_DIR/bin/gradle" "$@"
+

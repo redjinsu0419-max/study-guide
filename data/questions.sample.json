@@ -1,0 +1,75 @@
+[
+  {
+    "_id": "sample-math-e4-past-001",
+    "chunk_text": "초등학교 4학년 수학 분수의 덧셈. 3/8과 2/8을 더하는 문제",
+    "question": "3/8L의 주스와 2/8L의 주스를 한 병에 담았습니다. 모두 몇 L입니까?",
+    "answer": "5/8L",
+    "explanation": "분모가 같으므로 분자는 3+2로 계산하고 분모 8은 그대로 둡니다.",
+    "kind": "past",
+    "source": "교체용 샘플 데이터",
+    "schoolLevel": "elementary",
+    "grade": 4,
+    "subject": "수학"
+  },
+  {
+    "_id": "sample-math-e4-predicted-001",
+    "chunk_text": "초등학교 4학년 수학 분수의 덧셈 응용. 같은 분모의 분수 더하기",
+    "question": "색종이 7/10장과 1/10장을 사용했습니다. 모두 몇 장을 사용했습니까?",
+    "answer": "8/10장 또는 4/5장",
+    "explanation": "같은 분모끼리 분자를 더하면 8/10이고, 약분하면 4/5입니다.",
+    "kind": "predicted",
+    "source": "교체용 샘플 데이터",
+    "schoolLevel": "elementary",
+    "grade": 4,
+    "subject": "수학"
+  },
+  {
+    "_id": "sample-science-m2-past-001",
+    "chunk_text": "중학교 2학년 과학 전기 회로 옴의 법칙 전압 전류 저항",
+    "question": "저항이 5Ω인 전열선에 10V의 전압을 걸었습니다. 흐르는 전류는 몇 A입니까?",
+    "answer": "2A",
+    "explanation": "옴의 법칙 I=V/R을 사용하면 10/5=2A입니다.",
+    "kind": "past",
+    "source": "교체용 샘플 데이터",
+    "schoolLevel": "middle",
+    "grade": 2,
+    "subject": "과학"
+  },
+  {
+    "_id": "sample-science-m2-predicted-001",
+    "chunk_text": "중학교 2학년 과학 전기 회로 옴의 법칙 전류 구하기",
+    "question": "저항이 4Ω인 도선에 12V의 전압을 걸 때 전류의 세기는 몇 A입니까?",
+    "answer": "3A",
+    "explanation": "I=V/R=12/4=3A입니다.",
+    "kind": "predicted",
+    "source": "교체용 샘플 데이터",
+    "schoolLevel": "middle",
+    "grade": 2,
+    "subject": "과학"
+  },
+  {
+    "_id": "sample-english-h1-past-001",
+    "chunk_text": "고등학교 1학년 영어 관계대명사 주격 who 문법",
+    "question": "다음 빈칸에 알맞은 말을 고르세요: The student ___ helped me was very kind.",
+    "answer": "who",
+    "explanation": "선행사가 사람이고 빈칸 뒤 절에서 주어 역할을 하므로 주격 관계대명사 who를 씁니다.",
+    "kind": "past",
+    "source": "교체용 샘플 데이터",
+    "schoolLevel": "high",
+    "grade": 1,
+    "subject": "영어"
+  },
+  {
+    "_id": "sample-english-h1-predicted-001",
+    "chunk_text": "고등학교 1학년 영어 관계대명사 주격 which 사물 문법",
+    "question": "다음 빈칸에 알맞은 말을 고르세요: This is the book ___ changed my life.",
+    "answer": "which 또는 that",
+    "explanation": "선행사가 사물이고 관계절에서 주어 역할을 하므로 which 또는 that을 쓸 수 있습니다.",
+    "kind": "predicted",
+    "source": "교체용 샘플 데이터",
+    "schoolLevel": "high",
+    "grade": 1,
+    "subject": "영어"
+  }
+]
+

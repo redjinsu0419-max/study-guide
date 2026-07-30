@@ -1,0 +1,8 @@
+{
+  "name": "study-guide-api",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "test": "node --test"
+  }
+}

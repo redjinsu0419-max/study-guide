@@ -1,0 +1,27 @@
+name: study_guide
+description: 초·중·고등학생을 위한 AI 문제 풀이 및 유사 문제 학습 앱
+publish_to: "none"
+version: 1.0.0+1
+
+environment:
+  sdk: ">=3.9.0 <4.0.0"
+
+dependencies:
+  flutter:
+    sdk: flutter
+  cloud_firestore: ^6.7.1
+  firebase_auth: ^6.5.4
+  firebase_core: ^4.12.1
+  http: ^1.6.0
+  image_picker: ^1.2.3
+  intl: ^0.20.2
+  share_plus: ^11.1.0
+  url_launcher: ^6.3.2
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^6.0.0
+
+flutter:
+  uses-material-design: true
