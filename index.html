@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>공부 가이드 - AI 문제 풀이</title>
+  <title>공부 가이드 - AI 문제 풀이 & 4문제 복습</title>
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
     body { background-color: #f5f7fb; color: #333; display: flex; justify-content: center; min-height: 100vh; padding: 16px; }
@@ -31,7 +31,7 @@
   <div class="container">
     <div class="header">
       <h1>🎓 공부 가이드</h1>
-      <p id="sub-header">AI 맞춤형 문제 풀이 서비스</p>
+      <p id="sub-header">AI 문제 풀이 + 복습 4문제 자동 출제</p>
     </div>
 
     <!-- 로그인 (이름 입력) 화면 -->
@@ -83,21 +83,20 @@
         <textarea id="problem-text" placeholder="문제를 직접 적거나 궁금한 점을 적어주세요."></textarea>
       </div>
 
-      <button class="btn" onclick="solveProblem()">AI 문제 풀이 시작</button>
+      <button class="btn" onclick="solveProblem()">AI 문제 풀이 & 4문제 출제</button>
 
       <div id="loading" class="loading hidden">
-        🤖 AI가 문제를 분석하고 해설을 작성하고 있습니다...
+        🤖 AI가 문제를 분석하고 해설과 복습 4문제를 만들고 있습니다...
       </div>
 
       <div id="result-box" class="hidden">
-        <label>💡 AI 풀이 결과</label>
+        <label>💡 AI 풀이 및 복습 4문제 결과</label>
         <div id="result-text" class="result-card"></div>
       </div>
     </div>
   </div>
 
   <script>
-    // 구글 Gemini API 키 사전 탑재
     const EMBEDDED_API_KEY = "AQ.Ab8RN6KikItleof_-o8Y0zWIdgq_PTN6wEYTfrbwvR8jI0phDg";
     let base64Image = null;
 
@@ -155,9 +154,9 @@
       document.getElementById('loading').classList.remove('hidden');
       document.getElementById('result-box').classList.add('hidden');
 
-      const parts = [
-        { text: `당신은 친절한 AI 선생님입니다. 대상: ${grade} ${subject} 과정.\n다음 문제 사진 또는 질문을 분석하여 1) 정답, 2) 단계별 상세 풀이, 3) 핵심 개념 정리 세 부분으로 나누어 친절하게 설명해 주세요.` }
-      ];
+      const systemPrompt = `당신은 친절한 대한민국 최고 AI 선생님입니다. 대상: ${grade} ${subject} 과정.\n\n[요청 사항]\n다음 문제 사진 또는 질문을 분석하여 아래 4개 항목을 명확히 구분하여 풀이와 문제를 작성해 주세요:\n\n1. 🎯 [정답 및 핵심 요약]\n   - 문제의 최종 정답을 명확히 제시해 주세요.\n\n2. 💡 [단계별 상세 풀이]\n   - 학생이 쉽게 이해할 수 있도록 풀이 과정을 차근차근 단계별로 설명해 주세요.\n\n3. 📌 [핵심 개념 및 공식]\n   - 이 문제를 풀 때 꼭 알아야 하는 핵심 개념, 공식, 주의할 점을 정리해 주세요.\n\n4. 📝 [복습용 유사 및 예상 문제 4문제]\n   - 이 문제와 동일한 개념을 복습할 수 있는 **유사 기출 문제 2개**와 **응용/예상 문제 2개** (총 4문제)를 새로 출제해 주세요.\n   - 각 문제 아래에는 [문제]와 [정답 및 상세 해설]을 함께 친절하게 작성해 주세요.`;
+
+      const parts = [{ text: systemPrompt }];
 
       if (problemText) parts.push({ text: `질문/문제: ${problemText}` });
       if (base64Image) parts.push({ inlineData: { mimeType: "image/jpeg", data: base64Image } });
