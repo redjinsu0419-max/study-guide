@@ -152,7 +152,7 @@
         preview.src = e.target.result;
         preview.style.display = 'block';
         
-        // 데이터 안전 추출 (단일 문자열 보장)
+        // 인덱스 지정 완료 (단일 인코딩 문자열만 전송)
         const parts = e.target.result.split(',');
         base64Image = parts.length > 1 ? parts : parts[0];
       };
