@@ -152,7 +152,6 @@
         preview.src = e.target.result;
         preview.style.display = 'block';
         
-        // 100% 검증된 단일 문자열 추출 (배열 오류 예방)
         const fullUrl = String(e.target.result);
         if (fullUrl.indexOf(',') !== -1) {
           base64ImageString = fullUrl.substring(fullUrl.indexOf(',') + 1).trim();
@@ -193,30 +192,42 @@
         });
       }
 
-      const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${EMBEDDED_API_KEY}`;
+      // 모델명 순차 자동 폴백 (Model Not Found 방지)
+      const modelsToTry = ["gemini-1.5-flash-latest", "gemini-2.0-flash", "gemini-1.5-flash-8b"];
+      let successData = null;
+      let lastErrorMessage = "";
 
-      try {
-        const response = await fetch(url, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ contents: [{ parts: partsArray }] })
-        });
+      for (const modelName of modelsToTry) {
+        const url = `https://generativelanguage.googleapis.com/v1beta/models/${modelName}:generateContent?key=${EMBEDDED_API_KEY}`;
+        try {
+          const response = await fetch(url, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ contents: [{ parts: partsArray }] })
+          });
 
-        const data = await response.json();
-        document.getElementById('loading').classList.add('hidden');
-
-        if (data.error) {
-          alert(`오류가 발생했습니다: ${data.error.message}`);
-          return;
+          const data = await response.json();
+          if (!data.error) {
+            successData = data;
+            break;
+          } else {
+            lastErrorMessage = data.error.message;
+          }
+        } catch (err) {
+          lastErrorMessage = err.message;
         }
-
-        const result = data.candidates?.[0]?.content?.parts?.[0]?.text || "풀이를 생성하지 못했습니다.";
-        document.getElementById('result-text').innerText = result;
-        document.getElementById('result-box').classList.remove('hidden');
-      } catch (err) {
-        document.getElementById('loading').classList.add('hidden');
-        alert(`네트워크 오류가 발생했습니다: ${err.message}`);
       }
+
+      document.getElementById('loading').classList.add('hidden');
+
+      if (!successData) {
+        alert(`오류가 발생했습니다: ${lastErrorMessage}`);
+        return;
+      }
+
+      const result = successData.candidates?.[0]?.content?.parts?.[0]?.text || "풀이를 생성하지 못했습니다.";
+      document.getElementById('result-text').innerText = result;
+      document.getElementById('result-box').classList.remove('hidden');
     }
   </script>
 </body>
