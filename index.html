@@ -113,7 +113,7 @@
 
   <script>
     const EMBEDDED_API_KEY = "AQ.Ab8RN6KikItleof_-o8Y0zWIdgq_PTN6wEYTfrbwvR8jI0phDg";
-    let base64Image = null;
+    let base64ImageString = "";
 
     window.onload = function() {
       const savedName = localStorage.getItem('study_guide_name');
@@ -152,13 +152,12 @@
         preview.src = e.target.result;
         preview.style.display = 'block';
         
-        // 완벽 보완: substring을 사용하여 순수 인코딩 문자열만 완전 보장
-        const fullDataUrl = String(e.target.result);
-        const commaIndex = fullDataUrl.indexOf(',');
-        if (commaIndex !== -1) {
-          base64Image = fullDataUrl.substring(commaIndex + 1).trim();
+        // 100% 검증된 단일 문자열 추출 (배열 오류 예방)
+        const fullUrl = String(e.target.result);
+        if (fullUrl.indexOf(',') !== -1) {
+          base64ImageString = fullUrl.substring(fullUrl.indexOf(',') + 1).trim();
         } else {
-          base64Image = fullDataUrl.trim();
+          base64ImageString = fullUrl.trim();
         }
       };
       reader.readAsDataURL(file);
@@ -169,7 +168,7 @@
       const subject = document.getElementById('subject').value;
       const problemText = document.getElementById('problem-text').value.trim();
 
-      if (!base64Image && !problemText) {
+      if (!base64ImageString && !problemText) {
         alert('문제 사진을 첨부하거나 텍스트를 입력해 주세요.');
         return;
       }
@@ -179,10 +178,20 @@
 
       const systemPrompt = `당신은 친절한 대한민국 최고 AI 선생님입니다. 대상: ${grade} ${subject} 과정.\n\n[요청 사항]\n다음 문제 사진 또는 질문을 분석하여 아래 4개 항목을 명확히 구분하여 풀이와 문제를 작성해 주세요:\n\n1. 🎯 [정답 및 핵심 요약]\n   - 문제의 최종 정답을 명확히 제시해 주세요.\n\n2. 💡 [단계별 상세 풀이]\n   - 학생이 쉽게 이해할 수 있도록 풀이 과정을 차근차근 단계별로 설명해 주세요.\n\n3. 📌 [핵심 개념 및 공식]\n   - 이 문제를 풀 때 꼭 알아야 하는 핵심 개념, 공식, 주의할 점을 정리해 주세요.\n\n4. 📝 [복습용 유사 및 예상 문제 4문제]\n   - 이 문제와 동일한 개념을 복습할 수 있는 **유사 기출 문제 2개**와 **응용/예상 문제 2개** (총 4문제)를 새로 출제해 주세요.\n   - 각 문제 아래에는 [문제]와 [정답 및 상세 해설]을 함께 친절하게 작성해 주세요.`;
 
-      const parts = [{ text: systemPrompt }];
+      const partsArray = [{ text: systemPrompt }];
 
-      if (problemText) parts.push({ text: `질문/문제: ${problemText}` });
-      if (base64Image) parts.push({ inlineData: { mimeType: "image/jpeg", data: base64Image } });
+      if (problemText) {
+        partsArray.push({ text: `질문/문제: ${problemText}` });
+      }
+
+      if (base64ImageString) {
+        partsArray.push({
+          inline_data: {
+            mime_type: "image/jpeg",
+            data: String(base64ImageString)
+          }
+        });
+      }
 
       const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${EMBEDDED_API_KEY}`;
 
@@ -190,7 +199,7 @@
         const response = await fetch(url, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ contents: [{ parts }] })
+          body: JSON.stringify({ contents: [{ parts: partsArray }] })
         });
 
         const data = await response.json();
