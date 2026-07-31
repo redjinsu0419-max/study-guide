@@ -151,6 +151,7 @@
         const preview = document.getElementById('image-preview');
         preview.src = e.target.result;
         preview.style.display = 'block';
+        // 인코딩 문자열만 추출하여 단일 값 전송
         base64Image = e.target.result.split(',');
       };
       reader.readAsDataURL(file);
