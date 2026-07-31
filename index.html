@@ -152,12 +152,13 @@
         preview.src = e.target.result;
         preview.style.display = 'block';
         
-        // 이미지 인코딩 데이터 추출 완전 보완 (단일 문자열 추출)
-        const rawStr = String(e.target.result);
-        if (rawStr.indexOf(',') !== -1) {
-          base64Image = rawStr.split(',').trim();
+        // 완벽 보완: substring을 사용하여 순수 인코딩 문자열만 완전 보장
+        const fullDataUrl = String(e.target.result);
+        const commaIndex = fullDataUrl.indexOf(',');
+        if (commaIndex !== -1) {
+          base64Image = fullDataUrl.substring(commaIndex + 1).trim();
         } else {
-          base64Image = rawStr.trim();
+          base64Image = fullDataUrl.trim();
         }
       };
       reader.readAsDataURL(file);
