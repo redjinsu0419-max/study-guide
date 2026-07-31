@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>공부 가이드 - AI 문제 풀이</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, sans-serif; }
+    body { background-color: #f5f7fb; color: #333; display: flex; justify-content: center; min-height: 100vh; padding: 16px; }
+    .container { width: 100%; max-width: 480px; background: white; border-radius: 20px; box-shadow: 0 8px 24px rgba(0,0,0,0.08); overflow: hidden; display: flex; flex-direction: column; }
+    .header { background: #2563eb; color: white; padding: 20px; text-align: center; }
+    .header h1 { font-size: 22px; font-weight: 700; margin-bottom: 4px; }
+    .header p { font-size: 14px; opacity: 0.9; }
+    .content { padding: 20px; flex: 1; display: flex; flex-direction: column; gap: 16px; }
+    .hidden { display: none !important; }
+    .input-group { display: flex; flex-direction: column; gap: 8px; }
+    label { font-size: 14px; font-weight: 600; color: #4b5563; }
+    input[type="text"], select, textarea { width: 100%; padding: 12px 16px; border: 1px solid #d1d5db; border-radius: 12px; font-size: 15px; outline: none; transition: border-color 0.2s; }
+    input[type="text"]:focus, select:focus, textarea:focus { border-color: #2563eb; }
+    textarea { height: 100px; resize: none; }
+    .btn { background: #2563eb; color: white; border: none; padding: 14px; border-radius: 12px; font-size: 16px; font-weight: 600; cursor: pointer; text-align: center; transition: background 0.2s; }
+    .btn:hover { background: #1d4ed8; }
+    .btn-secondary { background: #e5e7eb; color: #374151; }
+    .btn-secondary:hover { background: #d1d5db; }
+    .image-preview { width: 100%; max-height: 200px; object-fit: contain; border-radius: 12px; border: 1px dashed #cbd5e1; display: none; }
+    .result-card { background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 12px; padding: 16px; margin-top: 8px; white-space: pre-wrap; line-height: 1.6; font-size: 15px; }
+    .badge { display: inline-block; background: #e0e7ff; color: #1d4ed8; padding: 4px 10px; border-radius: 20px; font-size: 13px; font-weight: 600; }
+    .loading { text-align: center; color: #2563eb; font-weight: 600; padding: 20px; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="header">
+      <h1>🎓 공부 가이드</h1>
+      <p id="sub-header">AI 맞춤형 문제 풀이 서비스</p>
+    </div>
+
+    <!-- 로그인 (이름 입력) 화면 -->
+    <div id="screen-login" class="content">
+      <div style="text-align: center; margin: 20px 0;">
+        <span style="font-size: 60px;">✏️</span>
+      </div>
+      <div class="input-group">
+        <label for="user-name">이름을 입력해 주세요</label>
+        <input type="text" id="user-name" placeholder="예: 홍진수" autofocus>
+      </div>
+      <button class="btn" onclick="startApp()">시작하기</button>
+    </div>
+
+    <!-- 문제 풀이 화면 -->
+    <div id="screen-main" class="content hidden">
+      <div style="display: flex; justify-content: space-between; align-items: center;">
+        <span class="badge" id="user-welcome">환영합니다!</span>
+        <button class="btn btn-secondary" style="padding: 6px 12px; font-size: 12px;" onclick="logout()">로그아웃</button>
+      </div>
+
+      <!-- API Key 설정 -->
+      <div class="input-group" style="background: #f1f5f9; padding: 12px; border-radius: 12px;">
+        <label for="api-key" style="font-size: 12px;">🔑 Gemini API Key (최초 1회 저장)</label>
+        <input type="text" id="api-key" placeholder="AI Studio에서 발급받은 API 키" style="font-size: 13px; padding: 8px 12px;">
+        <span style="font-size: 11px; color: #64748b;">* Google AI Studio에서 무료로 발급받을 수 있습니다.</span>
+      </div>
+
+      <div class="input-group">
+        <label>학년 & 과목 선택</label>
+        <div style="display: flex; gap: 8px;">
+          <select id="grade">
+            <option value="중학교 1학년">중학교 1학년</option>
+            <option value="중학교 2학년">중학교 2학년</option>
+            <option value="중학교 3학년">중학교 3학년</option>
+            <option value="고등학교 1학년">고등학교 1학년</option>
+            <option value="초등학교 6학년">초등학교 6학년</option>
+          </select>
+          <select id="subject">
+            <option value="수학">수학</option>
+            <option value="과학">과학</option>
+            <option value="영어">영어</option>
+            <option value="국어">국어</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="input-group">
+        <label for="problem-image">📷 문제 사진 첨부 (촬영/선택)</label>
+        <input type="file" id="problem-image" accept="image/*" onchange="previewImage(event)">
+        <img id="image-preview" class="image-preview" alt="문제 사진 미리보기">
+      </div>
+
+      <div class="input-group">
+        <label for="problem-text">📝 추가 질문 또는 문제 텍스트</label>
+        <textarea id="problem-text" placeholder="문제를 직접 적거나 궁금한 점을 적어주세요."></textarea>
+      </div>
+
+      <button class="btn" onclick="solveProblem()">AI 문제 풀이 시작</button>
+
+      <div id="loading" class="loading hidden">
+        🤖 AI가 문제를 분석하고 해설을 작성하고 있습니다...
+      </div>
+
+      <div id="result-box" class="hidden">
+        <label>💡 AI 풀이 결과</label>
+        <div id="result-text" class="result-card"></div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    let base64Image = null;
+
+    window.onload = function() {
+      const savedName = localStorage.getItem('study_guide_name');
+      const savedKey = localStorage.getItem('study_guide_gemini_key');
+      
+      if (savedKey) {
+        document.getElementById('api-key').value = savedKey;
+      }
+
+      if (savedName) {
+        showMainScreen(savedName);
+      }
+    };
+
+    function startApp() {
+      const nameInput = document.getElementById('user-name').value.trim();
+      if (!nameInput) {
+        alert('이름을 입력해 주세요.');
+        return;
+      }
+      localStorage.setItem('study_guide_name', nameInput);
+      showMainScreen(nameInput);
+    }
+
+    function showMainScreen(name) {
+      document.getElementById('screen-login').classList.add('hidden');
+      document.getElementById('screen-main').classList.remove('hidden');
+      document.getElementById('user-welcome').innerText = `${name} 학생 환영합니다!`;
+    }
+
+    function logout() {
+      localStorage.removeItem('study_guide_name');
+      document.getElementById('screen-main').classList.add('hidden');
+      document.getElementById('screen-login').classList.remove('hidden');
+    }
+
+    function previewImage(event) {
+      const file = event.target.files[0];
+      if (!file) return;
+
+      const reader = new FileReader();
+      reader.onload = function(e) {
+        const preview = document.getElementById('image-preview');
+        preview.src = e.target.result;
+        preview.style.display = 'block';
+        base64Image = e.target.result.split(',')[1];
+      };
+      reader.readAsDataURL(file);
+    }
+
+    async function solveProblem() {
+      const apiKey = document.getElementById('api-key').value.trim();
+      const grade = document.getElementById('grade').value;
+      const subject = document.getElementById('subject').value;
+      const problemText = document.getElementById('problem-text').value.trim();
+
+      if (!apiKey) {
+        alert('Gemini API 키를 입력해 주세요. (Google AI Studio에서 무료 발급 가능)');
+        return;
+      }
+      if (!base64Image && !problemText) {
+        alert('문제 사진을 첨부하거나 텍스트를 입력해 주세요.');
+        return;
+      }
+
+      localStorage.setItem('study_guide_gemini_key', apiKey);
+
+      document.getElementById('loading').classList.remove('hidden');
+      document.getElementById('result-box').classList.add('hidden');
+
+      const parts = [
+        { text: `당신은 친절한 AI 선생님입니다. 대상: ${grade} ${subject} 과정.\n다음 문제 사진 또는 질문을 분석하여 1) 정답, 2) 단계별 상세 풀이, 3) 핵심 개념 정리 세 부분으로 나누어 친절하게 설명해 주세요.` }
+      ];
+
+      if (problemText) {
+        parts.push({ text: `질문/문제: ${problemText}` });
+      }
+
+      if (base64Image) {
+        parts.push({
+          inlineData: {
+            mimeType: "image/jpeg",
+            data: base64Image
+          }
+        });
+      }
+
+      const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`;
+
+      try {
+        const response = await fetch(url, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ contents: [{ parts }] })
+        });
+
+        const data = await response.json();
+        document.getElementById('loading').classList.add('hidden');
+
+        if (data.error) {
+          alert(`오류가 발생했습니다: ${data.error.message}`);
+          return;
+        }
+
+        const result = data.candidates?.[0]?.content?.parts?.[0]?.text || "풀이를 생성하지 못했습니다.";
+        document.getElementById('result-text').innerText = result;
+        document.getElementById('result-box').classList.remove('hidden');
+      } catch (err) {
+        document.getElementById('loading').classList.add('hidden');
+        alert(`네트워크 오류가 발생했습니다: ${err.message}`);
+      }
+    }
+  </script>
+</body>
+</html>
