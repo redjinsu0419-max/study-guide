@@ -31,7 +31,7 @@
   <div class="container">
     <div class="header">
       <h1>🎓 공부 가이드</h1>
-      <p id="sub-header">Groq Llama 3.2 Vision AI 문제 풀이</p>
+      <p id="sub-header">Groq AI 문제 풀이 & 4문제 복습</p>
     </div>
 
     <!-- 로그인 (이름 입력) 화면 -->
@@ -53,7 +53,7 @@
         <button class="btn btn-secondary" style="padding: 6px 12px; font-size: 12px;" onclick="logout()">로그아웃</button>
       </div>
 
-      <!-- 안전한 API 키 설정 (기기에 1회 저장, 깃허브 노출 안 됨) -->
+      <!-- 안전한 API 키 설정 (스마트폰 기기에 1회 저장, 깃허브 노출 안 됨) -->
       <div class="input-group" style="background: #f1f5f9; padding: 12px; border-radius: 12px;">
         <label for="api-key" style="font-size: 12px;">🔑 Groq API Key 설정 (스마트폰에 안전 보관)</label>
         <div style="display: flex; gap: 8px;">
@@ -242,11 +242,33 @@
         });
       }
 
-      const modelsToTry = ["llama-3.2-11b-vision-preview", "llama-3.2-90b-vision-preview"];
+      // 1. 활성 비전 모델 동적 검색 (Decommissioned 원천 방지)
+      let targetModels = [
+        "meta-llama/llama-4-scout-17b-16e-instruct",
+        "llama-3.2-11b-vision-preview",
+        "llama-3.2-90b-vision-preview",
+        "llama-3.3-70b-versatile"
+      ];
+
+      try {
+        const modelsRes = await fetch("https://api.groq.com/openai/v1/models", {
+          headers: { 'Authorization': `Bearer ${apiKey}` }
+        });
+        const modelsData = await modelsRes.json();
+        if (modelsData.data && Array.isArray(modelsData.data)) {
+          const foundVision = modelsData.data
+            .map(m => m.id)
+            .filter(id => id.includes('vision') || id.includes('scout') || id.includes('llama-4'));
+          if (foundVision.length > 0) {
+            targetModels = [...foundVision, ...targetModels];
+          }
+        }
+      } catch (e) {}
+
       let successData = null;
       let lastErr = "";
 
-      for (const modelName of modelsToTry) {
+      for (const modelName of targetModels) {
         try {
           const response = await fetch("https://api.groq.com/openai/v1/chat/completions", {
             method: 'POST',
