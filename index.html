@@ -152,9 +152,13 @@
         preview.src = e.target.result;
         preview.style.display = 'block';
         
-        // 인덱스 지정 완료 (단일 인코딩 문자열만 전송)
-        const parts = e.target.result.split(',');
-        base64Image = parts.length > 1 ? parts : parts[0];
+        // 이미지 인코딩 데이터 추출 완전 보완 (단일 문자열 추출)
+        const rawStr = String(e.target.result);
+        if (rawStr.indexOf(',') !== -1) {
+          base64Image = rawStr.split(',').trim();
+        } else {
+          base64Image = rawStr.trim();
+        }
       };
       reader.readAsDataURL(file);
     }
