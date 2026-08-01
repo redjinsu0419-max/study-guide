@@ -42,6 +42,26 @@ function setImageStatus(message, isError = false) {
   status.style.color = isError ? "#dc2626" : "#64748b";
 }
 
+function cleanAiResult(text) {
+  return String(text)
+    .replace(/\\(?:left|right)/g, "")
+    .replace(/\\rightarrow/g, "→")
+    .replace(/\\times/g, "×")
+    .replace(/\\div/g, "÷")
+    .replace(/\\cdot/g, "·")
+    .replace(/\\(?:\(|\)|\[|\])/g, "")
+    .replace(/\${1,2}/g, "")
+    .replace(/\*\*(.*?)\*\*/g, "$1")
+    .replace(/__(.*?)__/g, "$1")
+    .replace(/^#{1,6}\s*/gm, "")
+    .replace(/^>\s?/gm, "")
+    .replace(/^\s*[-*]\s+/gm, "• ")
+    .replace(/^---+\s*$/gm, "")
+    .replace(/`/g, "")
+    .replace(/\n{3,}/g, "\n\n")
+    .trim();
+}
+
 function fileToDataUrl(file) {
   return new Promise((resolve, reject) => {
     const reader = new FileReader();
@@ -180,7 +200,7 @@ async function solveProblem() {
       throw new Error(payload.error || `서버 오류 (${response.status})`);
     }
     if (!payload.result) throw new Error("AI가 빈 답변을 보냈습니다.");
-    document.getElementById("result-text").innerText = payload.result;
+    document.getElementById("result-text").innerText = cleanAiResult(payload.result);
     resultBox.classList.remove("hidden");
     resultBox.scrollIntoView({ behavior: "smooth", block: "start" });
   } catch (error) {
