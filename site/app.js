@@ -8,6 +8,34 @@ const imageState = {
   mimeType: "",
   processing: null,
 };
+let progressTimer = null;
+
+function startProgress() {
+  const stage = document.getElementById("loading-stage");
+  const time = document.getElementById("loading-time");
+  const startedAt = Date.now();
+
+  const update = () => {
+    const elapsed = Math.floor((Date.now() - startedAt) / 1000);
+    if (elapsed < 5) stage.textContent = "사진을 선명하게 읽고 있어요…";
+    else if (elapsed < 14) stage.textContent = "AI가 문제와 조건을 분석하고 있어요…";
+    else if (elapsed < 24) stage.textContent = "단계별 풀이를 만들고 있어요…";
+    else stage.textContent = "복습 문제까지 마무리하고 있어요…";
+
+    const remaining = Math.max(0, 30 - elapsed);
+    time.textContent = remaining > 0
+      ? `${elapsed}초 경과 · 약 ${remaining}초 안에 완료될 예정이에요.`
+      : `${elapsed}초 경과 · 조금 더 걸리고 있지만 계속 진행 중이에요.`;
+  };
+
+  update();
+  progressTimer = setInterval(update, 1000);
+}
+
+function stopProgress() {
+  if (progressTimer) clearInterval(progressTimer);
+  progressTimer = null;
+}
 
 window.addEventListener("load", () => {
   const savedName = localStorage.getItem(nameStorageKey);
@@ -96,7 +124,7 @@ async function prepareImage(file) {
 
   // 작은 PNG/JPEG/WebP는 재압축하지 않아 가는 글자와 도형 선을 보존한다.
   const safeOriginalType = ["image/png", "image/jpeg", "image/webp"].includes(file.type);
-  if (safeOriginalType && file.size <= 4 * 1024 * 1024 && Math.max(width, height) <= 1800) {
+  if (safeOriginalType && file.size <= 2.5 * 1024 * 1024 && Math.max(width, height) <= 1800) {
     return { dataUrl: originalDataUrl, width, height, mimeType: file.type };
   }
 
@@ -122,6 +150,10 @@ async function prepareImage(file) {
 function previewImage(event) {
   const file = event.target.files?.[0];
   if (!file) return;
+
+  const otherInputId = event.target.id === "camera-image" ? "problem-image" : "camera-image";
+  const otherInput = document.getElementById(otherInputId);
+  if (otherInput) otherInput.value = "";
 
   imageState.data = "";
   imageState.mimeType = "";
@@ -154,7 +186,8 @@ async function solveProblem() {
   const grade = document.getElementById("grade").value;
   const subject = document.getElementById("subject").value;
   const problemText = document.getElementById("problem-text").value.trim();
-  const selectedFile = document.getElementById("problem-image").files?.[0];
+  const selectedFile = document.getElementById("problem-image").files?.[0]
+    || document.getElementById("camera-image").files?.[0];
 
   if (imageState.processing) {
     try {
@@ -179,6 +212,7 @@ async function solveProblem() {
   loading.classList.remove("hidden");
   resultBox.classList.add("hidden");
   solveButton.disabled = true;
+  startProgress();
 
   try {
     const response = await fetch(API_URL, {
@@ -206,6 +240,7 @@ async function solveProblem() {
   } catch (error) {
     alert(`AI 풀이를 받지 못했습니다.\n${error.message}\n\n잠시 후 다시 시도해 주세요.`);
   } finally {
+    stopProgress();
     loading.classList.add("hidden");
     solveButton.disabled = false;
   }
