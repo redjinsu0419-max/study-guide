@@ -84,7 +84,7 @@
 
       <div class="input-group">
         <label for="problem-image">📷 틀린 문제 사진 첨부 (촬영/선택)</label>
-        <input type="file" id="problem-image" accept="image/png,image/jpeg,image/webp" capture="environment" onchange="previewImage(event)">
+        <input type="file" id="problem-image" accept="image/*" onchange="previewImage(event)">
         <img id="image-preview" class="image-preview" alt="문제 사진 미리보기">
         <p id="image-status" class="image-status">PNG, JPG, WebP · 최대 20MB</p>
       </div>
